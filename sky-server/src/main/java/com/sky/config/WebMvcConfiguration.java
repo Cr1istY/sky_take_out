@@ -48,6 +48,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
                 .version("2.0")
                 .description("苍穹外卖项目接口文档")
                 .build();
+        log.info("准备输出接口文档...");
         Docket docket = new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo)
                 .select()
@@ -64,5 +65,6 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
     protected void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/doc.html").addResourceLocations("classpath:/META-INF/resources/");
         registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+        log.info("设置静态资源映射...");
     }
 }
