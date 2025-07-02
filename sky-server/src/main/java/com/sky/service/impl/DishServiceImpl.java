@@ -153,4 +153,19 @@ public class DishServiceImpl implements DishService {
         }
     }
 
+    @Override
+    public List<Dish> getByCID(Long id) {
+        return dishMapper.getByCID(id);
+    }
+
+    @Override
+    public void startAndStop(Integer status, Long id) {
+        Dish dish = Dish.builder()
+                .id(id)
+                .status(status)
+                .build();
+
+        dishMapper.update(dish);
+    }
+
 }
