@@ -159,7 +159,7 @@ public class DishServiceImpl implements DishService {
     }
 
     @Override
-    public void startAndStop(Integer status, Long id) {
+    public void startAndStop(Integer status, long id) {
         Dish dish = Dish.builder()
                 .id(id)
                 .status(status)

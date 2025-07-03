@@ -67,7 +67,7 @@ public class DishController {
     @DeleteMapping
     @ApiOperation("菜品批量删除")
     public Result delete(@RequestParam List<Long> ids) {
-        log.info("菜品批量删除");
+        log.info("菜品批量删除 {}", ids);
         dishService.deleteBatch(ids);
         return Result.success();
     }
@@ -111,7 +111,7 @@ public class DishController {
     }
 
     @PostMapping("status/{status}")
-    public Result startAndStop(@PathVariable Integer status, Long id) {
+    public Result startAndStop(@PathVariable Integer status, long id) {
         log.info("更改菜品状态 {}, {}", id, status);
         dishService.startAndStop(status, id);
         return Result.success();
