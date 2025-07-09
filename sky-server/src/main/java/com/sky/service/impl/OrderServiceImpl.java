@@ -19,6 +19,7 @@ import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import com.sky.websocket.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,9 @@ public class OrderServiceImpl implements OrderService {
     private AddressBookMapper addressBookMapper;
     @Autowired
     private WeChatPayUtil weChatPayUtil;
+    @Autowired
+    private WebSocketServer webSocketServer;
+
 
     /**
      * 用户下单
@@ -126,7 +130,8 @@ public class OrderServiceImpl implements OrderService {
     public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception {
         // 当前登录用户id
         Long userId = BaseContext.getCurrentId();
-        User user = userMapper.getByOpenid(String.valueOf(userId));
+
+//        User user = userMapper.getByOpenid(String.valueOf(userId));
 
 //        //调用微信支付接口，生成预支付交易单
 //        JSONObject jsonObject = weChatPayUtil.pay(
@@ -152,7 +157,16 @@ public class OrderServiceImpl implements OrderService {
         String orderNumber = ordersPaymentDTO.getOrderNumber();
 
         orderMapper.updateStatus(OrderStatus, OrderPaidStatus, checkOutTime, orderNumber);
+        Orders orders = orderMapper.getByNumber(orderNumber);
 
+        // 通过WebSocket向客户端推送消息
+
+        Map map = new HashMap();
+        map.put("type", 1); // 1来单提醒，2客户催单
+        map.put("orderId", orders.getId());
+        map.put("content", "订单" + orders.getNumber());
+        String json = JSON.toJSONString(map);
+        webSocketServer.sendToAllClient(json);
 
         return vo;
     }
@@ -301,7 +315,6 @@ public class OrderServiceImpl implements OrderService {
             BeanUtils.copyProperties(x, shoppingCart, "id");
             shoppingCart.setUserId(userId);
             shoppingCart.setCreateTime(LocalDateTime.now());
-
             return shoppingCart;
         }).collect(Collectors.toList());
 
@@ -510,6 +523,22 @@ public class OrderServiceImpl implements OrderService {
         orders.setDeliveryTime(LocalDateTime.now());
 
         orderMapper.update(orders);
+    }
+
+    @Override
+    public void reminder(Long id) {
+        Orders order = orderMapper.getById(id);
+
+        if (order == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        Map map = new HashMap();
+        map.put("type", 2); // 1来单提醒，2客户催单
+        map.put("orderId", order.getId());
+        map.put("content", "订单号" + order.getNumber());
+        String json = JSON.toJSONString(map);
+        webSocketServer.sendToAllClient(json);
+
     }
 
 }
