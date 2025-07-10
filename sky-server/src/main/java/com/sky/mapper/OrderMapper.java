@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -65,5 +66,27 @@ public interface OrderMapper {
      */
     @Select("select * from orders where status = #{status} and order_time < #{checkOutTime}")
     List<Orders> getByStatusAndOrderTimeLT(Integer status, LocalDateTime checkOutTime);
+
+    /**
+     * 查找一天的营业额
+     * @return
+     */
+    Double sumByMap(Map map);
+
+    /**
+     * 根据动态条件统计订单数量
+     * @param map
+     * @return
+     */
+    Integer countByMap(Map map);
+
+    /**
+     * 统计区间时间内销量前10
+     * @param start
+     * @param end
+     * @return
+     */
+    List<GoodsSalesDTO> getSalesTop10(LocalDateTime start, LocalDateTime end);
+
 
 }
